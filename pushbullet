@@ -11,7 +11,8 @@ fi
 source $PB_CONFIG > /dev/null 2>&1
 
 API_URL=https://api.pushbullet.com/v2
-EXECUTABLE="$(cd "$( dirname "$0" )" && pwd )"
+#EXECUTABLE="$(cd "$( dirname "$0" )" && pwd )"
+EXECUTABLE="$(readlink -f "$0")" # TODO find alternative for readlink for os x
 PROGDIR="${EXECUTABLE%/*}"
 
 if [ -z "$PB_API_KEY" ]; then
