@@ -30,6 +30,7 @@ push - Pushes data to a device. (the device name can simply be a unique part of
        the name that \"list\" returns)
 pushes active - Get your 'active' pushes (pushes that haven't been deleted) 
 pushes recent - Get all of your 'active' pushes since the last execution
+pushes last24h - Get 'active' pushes from the last 24 hours
 delete - Deletes a push, you must give the push 'iden', see https://docs.pushbullet.com/v2/pushes/
 
 Types: 
@@ -110,6 +111,11 @@ pushes)
 		echo "------------------"
 		curl -s "$API_URL/pushes?modified_after=$PB_LASTMODIFIED" -u "$PB_API_KEY": | getactivepushes
 		sed -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
+		;;
+	last24h)
+		echo "Your pushes from the last 24 hours:"
+		echo "------------------"
+		curl -s "$API_URL/pushes?modified_after=$(date -d "1 day ago" +%s)" -u "$PB_API_KEY": | getactivepushes
 		;;
 	*)
 		printUsage
