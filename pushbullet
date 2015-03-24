@@ -68,11 +68,6 @@ function getactivepushes () {
 	done
 }
 
-function deletepush () {
-	curlres=$(curl -s "$API_URL/pushes/$1" -u "$PB_API_KEY": -d device_iden="$dev_id" -d active="false" -X POST)
-	checkCurlOutput "$curlres"
-}
-
 checkCurlOutput() {
 	res=$(echo "$1" | grep -o "created" | tail -n1)
 	if [[ "$res" != "created" ]]; then
