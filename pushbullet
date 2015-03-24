@@ -31,7 +31,8 @@ push - Pushes data to a device. (the device name can simply be a unique part of
 pushes active - Get your 'active' pushes (pushes that haven't been deleted) 
 pushes recent - Get all of your 'active' pushes since the last execution
 pushes last24h - Get 'active' pushes from the last 24 hours
-delete - Deletes a push, you must give the push 'iden', see https://docs.pushbullet.com/v2/pushes/
+delete $iden - Deletes a push, you must give the push 'iden', see https://docs.pushbullet.com/v2/pushes/
+delete all - Deletes all pushes
 
 Types: 
 note
@@ -50,6 +51,7 @@ Type Parameters:
 \"file\" type: 	give the path to the file.
 \"link\" type: 	give the title of the link then the url and the the message body
 "
+exit 1
 }
 
 function getactivepushes () { 
@@ -123,19 +125,31 @@ pushes)
 	esac
 	;;
 delete)
-	if [ -z "$2" ]; then
+	case $2 in
+	"")
 		printUsage
-		exit
-	fi
-	curlres=$(curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY": -X DELETE)
-	if [ "$curlres" == '{}' ]; then
-		echo "ok"
-	fi
+		;;
+	all)
+		echo "deleting all pushes"
+		curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -X DELETE)
+		if [ ! "$curlres" == '{}' ]; then
+			echo "something went wrong"
+			exit 1
+		fi
+		;;
+	*)
+		echo "deleting only $2"
+		curlres=$(curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY": -X DELETE)
+		if [ ! "$curlres" == '{}' ]; then
+			echo "something went wrong"
+			exit 1
+		fi
+		;;
+	esac
 	;;
 push)
 	if [ -z "$2" ]; then
 		printUsage
-		exit
 	fi
 	curlres=$(curl -s "$API_URL/devices" -u "$PB_API_KEY":)
 	devices=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep nickname | cut -d'"' -f4)
