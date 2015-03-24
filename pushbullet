@@ -74,6 +74,7 @@ checkCurlOutput() {
 		echo "Error submitting the request. The POST error message was:"
 	fi
 	echo "$res"
+	exit 1
 } 
 
 if [ "$1" = "" ];then
