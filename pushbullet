@@ -16,7 +16,7 @@ EXECUTABLE="$(readlink -f "$0")" # TODO find alternative for readlink for os x
 PROGDIR="${EXECUTABLE%/*}"
 
 if [ -z "$PB_API_KEY" ]; then
-	echo "could not find api key"
+	echo -e "\e[0;33mWarning, your API key is not set.\nPlease create \"$PB_CONFIG\" with a line starting with PB_API_KEY= and your PushBullet key\e[00m"
 	exit 1
 fi
 
@@ -72,18 +72,10 @@ checkCurlOutput() {
 	res=$(echo "$1" | grep -o "created" | tail -n1)
 	if [[ "$res" != "created" ]]; then
 		echo "Error submitting the request. The POST error message was:"
+		exit 1
 	fi
 	echo "$res"
-	exit 1
 } 
-
-if [ "$1" = "" ];then
-	if [ "$PB_API_KEY" = "" ];then
-		echo -e "\e[0;33mWarning, your API key is not set.\nPlease create $PB_CONFIG with a line starting with PB_API_KEY= and your PushBullet key\e[00m"
-	fi
-	printUsage
-	exit
-fi
 
 case $1 in
 list)
