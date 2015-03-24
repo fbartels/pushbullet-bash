@@ -58,12 +58,14 @@ function getactivepushes () {
 	allpushes=$("$PROGDIR"/JSON.sh -l)
 	activepushes=$(echo "$allpushes" | egrep "\[\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done)
 	for id in $activepushes; do
+		#echo "$allpushes" # echo all pushes to find information worth printing
 		iden=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"iden\"\]"|cut -f 2)
 		title=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"title\"\]"|cut -f 2)
+		body=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"body\"\]"|cut -f 2)
 		if [[ -z "$title" ]]; then
-			echo "(no title) $iden"
+			echo "(no title) $iden $body"
 		else
-			echo "$title $iden"
+			echo "$title $iden $body"
 		fi
 	done
 }
