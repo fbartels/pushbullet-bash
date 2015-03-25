@@ -100,7 +100,7 @@ pushes)
 		echo "Your recent pushes:"
 		echo "------------------"
 		curl -s "$API_URL/pushes?modified_after=$PB_LASTMODIFIED" -u "$PB_API_KEY": | getactivepushes
-		sed -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
+		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
 		;;
 	last24h)
 		echo "Your pushes from the last 24 hours:"
