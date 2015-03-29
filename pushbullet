@@ -91,7 +91,7 @@ pushes)
 	active)
 		echo "Your active pushes:"
 		echo "------------------"
-		curl -s "$API_URL/pushes" -u "$PB_API_KEY": | getactivepushes
+		curl -s "$API_URL/pushes?active=true" -u "$PB_API_KEY": | getactivepushes
 		;;
 	recent)
 		# set LASTMODIFIED (unix time) to zero if emptry
@@ -101,13 +101,13 @@ pushes)
 		fi
 		echo "Your recent pushes:"
 		echo "------------------"
-		curl -s "$API_URL/pushes?modified_after=$PB_LASTMODIFIED" -u "$PB_API_KEY": | getactivepushes
+		curl -s "$API_URL/pushes?active=true&modified_after=$PB_LASTMODIFIED" -u "$PB_API_KEY": | getactivepushes
 		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
 		;;
 	last24h)
 		echo "Your pushes from the last 24 hours:"
 		echo "------------------"
-		curl -s "$API_URL/pushes?modified_after=$(date -d "1 day ago" +%s)" -u "$PB_API_KEY": | getactivepushes
+		curl -s "$API_URL/pushes?active=true&modified_after=$(date -d "1 day ago" +%s)" -u "$PB_API_KEY": | getactivepushes
 		;;
 	*)
 		printUsage
