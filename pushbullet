@@ -63,11 +63,11 @@ function getactivepushes () {
 		modified=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"modified\"\]"|cut -f 2)
 		type=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"type\"\]"|cut -f 2)
 		if [[ -z "$title" ]]; then
-			echo "(no title); $iden; $type; $modified"
-		else
-			echo "$title; $iden; $type; $modified"
+			title="(no title)"
 		fi
+		echo "$iden:$type:$title:$modified"
 	done
+	# | tail -n+3 | awk -F ":" '{print $4}'
 }
 
 checkCurlOutput() {
