@@ -144,6 +144,7 @@ push)
 	idens=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep iden | cut -d'"' -f4)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
+
 	case $3 in
 	note)
 		body=""
