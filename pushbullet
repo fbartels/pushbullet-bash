@@ -49,12 +49,12 @@ Type Parameters:
 \"list\" type: 	give the name of the list, then each of the list items,
                 separated by spaces.
 \"file\" type: 	give the path to the file.
-\"link\" type: 	give the title of the link then the url and the the message body
+\"link\" type: 	give the title of the link then the url and an optional message body
 "
 exit 1
 }
 
-function getactivepushes () { 
+function getactivepushes () {
 	allpushes=$("$PROGDIR"/JSON.sh -l)
 	activepushes=$(echo "$allpushes" | egrep "\[\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done)
 	for id in $activepushes; do
@@ -141,10 +141,9 @@ push)
 	fi
 	curlres=$(curl -s "$API_URL/devices" -u "$PB_API_KEY":)
 	devices=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep nickname | cut -d'"' -f4)
-	idens=$(echo "$curlres" | tr '{' '\n' | grep active:\"true | tr ',' '\n' | grep iden | cut -d'"' -f4)
+	idens=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep iden | cut -d'"' -f4)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
-
 	case $3 in
 	note)
 		body=""
