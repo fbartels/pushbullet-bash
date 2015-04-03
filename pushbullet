@@ -139,6 +139,17 @@ delete)
 		;;
 	esac
 	;;
+pull)
+	case $2 in
+	"")
+		printUsage
+		;;
+	*)
+		curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY":
+		echo
+		;;
+	esac
+	;;
 push)
 	if [ -z "$2" ]; then
 		printUsage
