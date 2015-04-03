@@ -81,8 +81,12 @@ case $1 in
 list)
 	echo "Available devices:"
 	echo "------------------"
-	curl -s "$API_URL/devices" -u "$PB_API_KEY": | tr ',' '\n' | grep nickname | cut -d '"' -f4
+	curl -s "$API_URL/devices" -u "$PB_API_KEY": | tr ',' '\n' | grep nickname | sort -n | cut -d '"' -f4
 	echo "all"
+	echo
+	echo "Contacts:"
+	echo "------------------"
+	curl -s "$API_URL/contacts" -u "$PB_API_KEY": | tr ',' '\n' | grep \"email\" | sort -n | cut -d '"' -f4
 	;;
 pushes)
 	case $2 in
