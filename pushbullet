@@ -22,15 +22,17 @@ printUsage() {
 echo "Usage: pushbullet <action> <device> <type> <data>
 
 Actions: 
-list - Lists all devices in your PushBullet account. (does not require
+list - List all devices and contacts in your PushBullet account. (does not require
        additional parameters)
-push - Pushes data to a device. (the device name can simply be a unique part of
+push - Push data to a device. (the device name can simply be a unique part of
        the name that \"list\" returns)
-pushes active - List your 'active' pushes (pushes that haven't been deleted) 
-pushes recent - List all of your 'active' pushes since the last run
-pushes last24h - List 'active' pushes from the last 24 hours
-delete $iden - Deletes a push, you must give the push 'iden', see https://docs.pushbullet.com/v2/pushes/
-delete all - Deletes all pushes
+pushes active - List your 'active' pushes (pushes that haven't been deleted).
+       Format is: iden:type:title:modified
+pushes recent - List all of your 'active' pushes since the last run.
+pushes last24h - List 'active' pushes from the last 24 hours.
+delete \$iden - Delete a specific push.
+delete all - Delete all pushes.
+pull \$iden - Display a specific push.
 
 Types: 
 note
