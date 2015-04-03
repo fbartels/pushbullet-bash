@@ -145,8 +145,7 @@ pull)
 		printUsage
 		;;
 	*)
-		curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY":
-		echo
+		curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY": | "$PROGDIR"/JSON.sh -b
 		;;
 	esac
 	;;
