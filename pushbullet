@@ -14,18 +14,19 @@ API_URL=https://api.pushbullet.com/v2
 PROGDIR="$(cd "$( dirname "$0" )" && pwd )"
 
 if [ -z "$PB_API_KEY" ]; then
-	echo -e "\e[0;33mWarning, your API key is not set.\nPlease create \"$PB_CONFIG\" with a line starting with PB_API_KEY= and your PushBullet key\e[00m"
+	echo -e "\e[0;33mWarning, your API key is not set.\nPlease create \"$PB_CONFIG\"
+with a line starting with PB_API_KEY= and your PushBullet key\e[00m"
 	exit 1
 fi
 
 printUsage() {
 echo "Usage: pushbullet <action> <device> <type> <data>
 
-Actions: 
+Actions:
 list - List all devices and contacts in your PushBullet account. (does not require
        additional parameters)
-push - Push data to a device or contact. (the device name can simply be a unique part of
-       the name that \"list\" returns)
+push - Push data to a device or contact. (the device name can simply be
+       a unique part of the name that \"list\" returns)
 pushes active - List your 'active' pushes (pushes that haven't been deleted).
        Format is: iden:type:title:modified
 pushes recent - List all of your 'active' pushes since the last run.
