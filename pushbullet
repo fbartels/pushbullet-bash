@@ -24,13 +24,14 @@ echo "Usage: pushbullet <action> <device> <type> <data>
 Actions: 
 list - List all devices and contacts in your PushBullet account. (does not require
        additional parameters)
-push - Push data to a device. (the device name can simply be a unique part of
+push - Push data to a device or contact. (the device name can simply be a unique part of
        the name that \"list\" returns)
 pushes active - List your 'active' pushes (pushes that haven't been deleted).
        Format is: iden:type:title:modified
 pushes recent - List all of your 'active' pushes since the last run.
 pushes last24h - List 'active' pushes from the last 24 hours.
 delete \$iden - Delete a specific push.
+delete except \$number - Delete all pushes except the last \$number.
 delete all - Delete all pushes.
 pull \$iden - Display a specific push.
 
@@ -131,8 +132,21 @@ delete)
 			exit 1
 		fi
 		;;
+	except)
+		if [ "$3" == "" ]; then
+			printUsage
+		fi
+		echo "deleting all pushes except the last $3"
+		number=$(($3+1))
+		allpushes=$(curl -s "$API_URL/pushes?active=true" -u "$PB_API_KEY": | "$PROGDIR"/JSON.sh -l)
+		activepushes=$(echo "$allpushes" | egrep "\[\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done | tail -n "+$number")
+		for id in $activepushes; do
+			iden=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"iden\"\]"|cut -f 2 | cut -d'"' -f 2)
+			$0 delete $iden
+		done
+		;;
 	*)
-		echo "deleting only $2"
+		echo "deleting $2"
 		curlres=$(curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY": -X DELETE)
 		if [ ! "$curlres" == '{}' ]; then
 			echo "something went wrong"
