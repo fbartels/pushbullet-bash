@@ -3,8 +3,8 @@
 
 # Send a message through pushbullet after a command has finished.
 # Can be called in two ways:
-# apt-get update; pb # will just report the exit status
-# pb apt-get update # will send the command, time till exit and exit status
+# apt-get update; pb # will just report the exit status.
+# pb apt-get update # will send the command, time till exit and return code.
 
 pb() {
 	EXITCODE=$?
@@ -26,5 +26,6 @@ pb() {
 		PUSH_TITLE="FAIL!"
 	fi
 
-	pushbullet push all note "$PUSH_TITLE Command completed on $(hostname)" "Finished $* in $TIME. Exit code was $EXITCODE"
+	pushbullet push all note "$PUSH_TITLE Command completed on $(hostname)" "Finished $* in $TIME. Return code was $EXITCODE."
+	exit $EXITCODE
 }
