@@ -73,11 +73,10 @@ function getactivepushes () {
 
 checkCurlOutput() {
 	res=$(echo "$1" | grep -o "created" | tail -n1)
-	if [[ "$res" != "created" ]]; then
-		echo "Error submitting the request. The POST error message was:"
+	if [[ "$res" != "created" ]] && [[ ! "$1" == "{}" ]]; then
+		echo "Error submitting the request. The error message was:" $1
 		exit 1
 	fi
-	echo "$res"
 } 
 
 case $1 in
@@ -127,10 +126,7 @@ delete)
 	all)
 		echo "deleting all pushes"
 		curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -X DELETE)
-		if [ ! "$curlres" == '{}' ]; then
-			echo "something went wrong"
-			exit 1
-		fi
+		checkCurlOutput "$curlres"
 		;;
 	except)
 		if [ "$3" == "" ]; then
@@ -148,10 +144,7 @@ delete)
 	*)
 		echo "deleting $2"
 		curlres=$(curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY": -X DELETE)
-		if [ ! "$curlres" == '{}' ]; then
-			echo "something went wrong"
-			exit 1
-		fi
+		checkCurlOutput "$curlres"
 		;;
 	esac
 	;;
