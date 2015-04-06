@@ -74,12 +74,13 @@ function getactivepushes () {
 checkCurlOutput() {
 	res=$(echo "$1" | grep -o "created" | tail -n1)
 	if [[ "$1" == *"The param 'channel_tag' has an invalid value."* ]] && [ "$1" == *"The param 'device_iden' has an invalid value."* ]]; then
-		echo "You specified an unknown Device or Channel."
+		echo "Error: You specified an unknown device or channel."
 		exit 1
 	elif [[ "$res" != "created" ]] && [[ ! "$1" == "{}" ]]; then
 		echo "Error submitting the request. The error message was:" $1
 		exit 1
 	fi
+	echo "Success"
 } 
 
 case $1 in
