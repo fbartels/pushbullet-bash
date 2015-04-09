@@ -18,6 +18,11 @@ if [ -z "$PB_API_KEY" ]; then
 	exit 1
 fi
 
+if [ ! $(which curl) ]; then
+	echo "pushbullet-bash requires curl to run. Please install curl"
+	exit 1
+fi
+
 printUsage() {
 echo "Usage: pushbullet <action> <device> <type> <data>
 
