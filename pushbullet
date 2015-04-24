@@ -86,7 +86,7 @@ checkCurlOutput() {
 		exit 1
 	fi
 	echo "Success"
-} 
+}
 
 case $1 in
 list)
@@ -98,6 +98,10 @@ list)
 	echo "Contacts:"
 	echo "------------------"
 	curl -s "$API_URL/contacts" -u "$PB_API_KEY": | tr ',' '\n' | grep \"email\" | sort -n | cut -d '"' -f4
+	;;
+create)
+	# create a device in pushbullet named like the current hostname
+	curl -s "$API_URL/devices" -u "$PB_API_KEY": -d nickname=$(hostname) -d type=stream -X POST
 	;;
 pushes)
 	case $2 in
