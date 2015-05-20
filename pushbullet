@@ -142,8 +142,9 @@ delete)
 		checkCurlOutput "$curlres"
 		;;
 	except)
-		if [ "$3" == "" ]; then
-			printUsage
+		# test if $3 is not empty and a number
+		if [ -z "${3##*[!0-9]}" ]; then
+		printUsage
 		fi
 		echo "deleting all pushes except the last $3"
 		number=$(($3+1))
