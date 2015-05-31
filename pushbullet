@@ -13,7 +13,7 @@ source $PB_CONFIG > /dev/null 2>&1
 API_URL=https://api.pushbullet.com/v2
 PROGDIR="$(cd "$( dirname "$0" )" && pwd )"
 
-if [ -z "$PB_API_KEY" ]; then
+if [[ -z "$PB_API_KEY" ]] && [[ "$1" != "setup" ]]; then
 	echo -e "\e[0;33mWarning, your API key is not set.\nPlease create \"$PB_CONFIG\" with a line starting with PB_API_KEY= and your PushBullet key\e[00m"
 	exit 1
 fi
@@ -89,6 +89,10 @@ checkCurlOutput() {
 }
 
 case $1 in
+create)
+	# create a device in pushbullet named like the current hostname
+	curl -s "$API_URL/devices" -u "$PB_API_KEY": -d nickname=$(hostname) -d type=stream -X POST
+	;;
 list)
 	echo "Available devices:"
 	echo "------------------"
@@ -98,10 +102,6 @@ list)
 	echo "Contacts:"
 	echo "------------------"
 	curl -s "$API_URL/contacts" -u "$PB_API_KEY": | tr ',' '\n' | grep \"email\" | sort -n | cut -d '"' -f4
-	;;
-create)
-	# create a device in pushbullet named like the current hostname
-	curl -s "$API_URL/devices" -u "$PB_API_KEY": -d nickname=$(hostname) -d type=stream -X POST
 	;;
 pushes)
 	case $2 in
@@ -277,8 +277,24 @@ push)
 	;;
 	esac
 ;;
+setup)
+	CLIENT_ID=u1DAx9KcrmMRUjhcMb3qWOZluwE2MjKa
+	REDIRECT_URI="https%3A%2F%2Ffbartels.github.io%2Fpushbullet-bash"
+	OAUTH_URL="https://www.pushbullet.com/authorize?client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI&response_type=token&scope=everything"
+	echo
+	echo "Please open the following URL manually if it did not open automatically:"
+	echo
+	echo "$OAUTH_URL"
+	echo
+	echo "Before continuing you need to save your newly created token in $PB_CONFIG"
 
+	if [ "$(uname)" == "Darwin" ]; then
+		open "$OAUTH_URL"
+	else
+		xdg-open "$OAUTH_URL" > /dev/null
+	fi
+;;
 *)
 	printUsage
-	;;
+;;
 esac
