@@ -54,7 +54,7 @@
     }
 
     var accessToken = getAccessToken();
-    if (tokenFile && accessToken) {
+    if (accessToken) {
         document.getElementById("main_content").innerHTML =
         "<p>Run the following in your terminal to authorize <code>pushbullet-bash</code>:</p><pre>echo 'PB_API_KEY=" + accessToken + "' > ~/.config/pushbullet</pre>";
     }
