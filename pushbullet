@@ -227,6 +227,7 @@ push)
 		  --header 'Content-Type: application/json' --data-binary "$JsonData")
 		checkCurlOutput "$curlres"
 	;;
+
 	file)
 		# Api docs: https://docs.pushbullet.com/v2/upload-request/
 		mimetype=$(file -i -b $4)
