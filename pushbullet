@@ -39,6 +39,7 @@ delete \$iden - Delete a specific push.
 delete except \$number - Delete all pushes except the last \$number.
 delete all - Delete all pushes.
 pull \$iden - Display a specific push.
+setup - Use OAuth to retrieve a PushBullet API key for pushbullet-bash.
 
 Types: 
 note
