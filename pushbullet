@@ -43,8 +43,6 @@ setup - Use OAuth to retrieve a PushBullet API key for pushbullet-bash.
 
 Types: 
 note
-address
-list
 file
 link
 
@@ -52,9 +50,6 @@ Type Parameters:
 (all parameters must be put inside quotes if more than one word)
 \"note\" type: 	give the title, then the note text. The note text can also be
                 given via stdin, leaving the note text field empty.
-\"address\" type: give the address name, then the address or Google Maps query.
-\"list\" type: 	give the name of the list, then each of the list items,
-                separated by spaces.
 \"file\" type: 	give the path to the file and an optional message body.
 \"link\" type: 	give the title of the link then the url and an optional message body.
 "
@@ -209,26 +204,6 @@ push)
 		fi
 		checkCurlOutput "$curlres"
 	;;
-	address)
-		curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -d device_iden="$dev_id" -d type=address -d name="$4" -d address="$5" -X POST)
-		checkCurlOutput "$curlres"
-	;;
-	list)
-		# print all array items after $4, convert them to a JSON array
-		# URLencoded data requests do not work for lists at the moment 
-		itemlist=$(printf '%s\n' "${@:5}" \
-			| awk ' BEGIN { ORS = ""; print "["; } { print "/@"$0"/@"; } END { print "]"; }' \
-			| sed "s^\"^\\\\\"^g;s^\/\@\/\@^\", \"^g;s^\/\@^\"^g")
-		if [ "$2" = "all" ]; then
-		  JsonData='{"type": "list", "title": "'"$4"'", "items": '"$itemlist"'}'
-		else
-		  JsonData='{"type": "list", "device_iden": "'"$dev_id"'", "title":"'"$4"'", "items":'"$itemlist"'}'
-		fi
-		curlres=$(curl -s $API_URL/pushes -u "$PB_API_KEY": -X POST \
-		  --header 'Content-Type: application/json' --data-binary "$JsonData")
-		checkCurlOutput "$curlres"
-	;;
-
 	file)
 		# Api docs: https://docs.pushbullet.com/v2/upload-request/
 		mimetype=$(file -i -b $4)
