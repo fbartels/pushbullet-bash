@@ -87,7 +87,7 @@ checkCurlOutput() {
 case $1 in
 create)
 	# create a device in pushbullet named like the current hostname
-	curl -s "$API_URL/devices" -u "$PB_API_KEY": -d nickname=$(hostname) -d type=stream -X POST
+	curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" --data-binary "{\"nickname\":\"$(hostname)\",\"icon\":\"system\"}" -X POST
 	;;
 list)
 	echo "Available devices:"
@@ -242,7 +242,6 @@ push)
 		fi
 		checkCurlOutput "$curlres"
 	;;
-
 	link)
 		if [ "$2" = "all" ]; then
 			curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -d type=link -d title="$4" -d url="$5" -d body="$6" -X POST)
@@ -253,7 +252,6 @@ push)
 		fi
 		checkCurlOutput "$curlres"
 	;;
-
 	*)
 		printUsage
 	;;
