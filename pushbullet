@@ -92,19 +92,19 @@ create)
 list)
 	echo "Available devices:"
 	echo "------------------"
-	curl -s "$API_URL/devices" -u "$PB_API_KEY": | tr ',' '\n' | grep \"nickname\" | sort -n | cut -d '"' -f4
+	curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"nickname\" | sort -n | cut -d '"' -f4
 	echo "all"
 	echo
 	echo "Contacts:"
 	echo "------------------"
-	curl -s "$API_URL/contacts" -u "$PB_API_KEY": | tr ',' '\n' | grep \"email\" | sort -n | cut -d '"' -f4
+	curl -s "$API_URL/contacts" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"email\" | sort -n | cut -d '"' -f4
 	;;
 pushes)
 	case $2 in
 	active)
 		echo "Your active pushes:"
 		echo "------------------"
-		curl -s "$API_URL/pushes?active=true" -u "$PB_API_KEY": | getactivepushes
+		curl -s "$API_URL/pushes?active=true" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | getactivepushes
 		;;
 	recent)
 		# set LASTMODIFIED (unix time) to zero if emptry
@@ -114,13 +114,13 @@ pushes)
 		fi
 		echo "Your recent pushes:"
 		echo "------------------"
-		curl -s "$API_URL/pushes?active=true&modified_after=$PB_LASTMODIFIED" -u "$PB_API_KEY": | getactivepushes
+		curl -s "$API_URL/pushes?active=true&modified_after=$PB_LASTMODIFIED" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | getactivepushes
 		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
 		;;
 	last24h)
 		echo "Your pushes from the last 24 hours:"
 		echo "------------------"
-		curl -s "$API_URL/pushes?active=true&modified_after=$(date -d "1 day ago" +%s)" -u "$PB_API_KEY": | getactivepushes
+		curl -s "$API_URL/pushes?active=true&modified_after=$(date -d "1 day ago" +%s)" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | getactivepushes
 		;;
 	*)
 		printUsage
@@ -134,17 +134,17 @@ delete)
 		;;
 	all)
 		echo "deleting all pushes"
-		curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -X DELETE)
+		curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" -X DELETE)
 		checkCurlOutput "$curlres"
 		;;
 	except)
 		# test if $3 is not empty and a number
 		if [ -z "${3##*[!0-9]}" ]; then
-		printUsage
+			printUsage
 		fi
 		echo "deleting all pushes except the last $3"
 		number=$(($3+1))
-		allpushes=$(curl -s "$API_URL/pushes?active=true" -u "$PB_API_KEY": | "$PROGDIR"/JSON.sh -l)
+		allpushes=$(curl -s "$API_URL/pushes?active=true" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | "$PROGDIR"/JSON.sh -l)
 		activepushes=$(echo "$allpushes" | egrep "\[\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done | tail -n "+$number")
 		for id in $activepushes; do
 			iden=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"iden\"\]"|cut -f 2 | cut -d'"' -f 2)
@@ -153,7 +153,7 @@ delete)
 		;;
 	*)
 		echo "deleting $2"
-		curlres=$(curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY": -X DELETE)
+		curlres=$(curl -s "$API_URL/pushes/$2" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" -X DELETE)
 		checkCurlOutput "$curlres"
 		;;
 	esac
