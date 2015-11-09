@@ -164,7 +164,7 @@ pull)
 		printUsage
 		;;
 	*)
-		curl -s "$API_URL/pushes/$2" -u "$PB_API_KEY": | "$PROGDIR"/JSON.sh -b
+		curl -s "$API_URL/pushes/$2" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | "$PROGDIR"/JSON.sh -b
 		;;
 	esac
 	;;
@@ -172,7 +172,7 @@ push)
 	if [ -z "$2" ]; then
 		printUsage
 	fi
-	curlres=$(curl -s "$API_URL/devices" -u "$PB_API_KEY":)
+	curlres=$(curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" )
 	devices=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep nickname | cut -d'"' -f4)
 	idens=$(echo "$curlres" | tr '{' '\n' | grep active\"\:true | tr ',' '\n' | grep iden | cut -d'"' -f4)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
@@ -191,16 +191,20 @@ push)
 			body="$5"
 		fi
 		if [ "$2" = "all" ]; then
-			curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -d type=note -d title="$4" --data-urlencode body="$body" -X POST)
+			echo "Sending to All Devices"
+			curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary "{\"type\":\"note\",\"title\":\"$4\",\"body\":\"$5\"}" -X POST)
 		# $2 must be a contact/an email address if it contains an @.
 		elif [[ "$2" == *@* ]]; then
-			curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -d email="$2" -d type=note -d title="$4" --data-urlencode body="$body" -X POST)
+			echo "Sending to email address $2"
+			curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary "{\"type\":\"note\",\"email\":\"$2\",\"title\":\"$4\",\"body\":\"$5\"}"  -X POST)
 		# $2 must be a channel_tag if $lineNum is empty.
 		elif [ -z "$lineNum" ]; then
-			curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -d channel_tag="$2" -d type=note -d title="$4" --data-urlencode body="$body" -X POST)
+			echo "Sending to channel $2"
+			curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary "{\"type\":\"note\",\"channel_tag\":\"$2\",\"title\":\"$4\",\"body\":\"$5\"}"  -X POST)
 		# in all other cases $2 must be the identifier of a device.
 		else
-			curlres=$(curl -s "$API_URL/pushes" -u "$PB_API_KEY": -d device_iden="$dev_id" -d type=note -d title="$4" --data-urlencode body="$body" -X POST)
+			echo "Sending to device $2"
+			curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary "{\"type\":\"note\",\"device_iden\":\"$dev_id\",\"title\":\"$4\",\"body\":\"$5\"}" -X POST)
 		fi
 		checkCurlOutput "$curlres"
 	;;
