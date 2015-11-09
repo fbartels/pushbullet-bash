@@ -272,6 +272,9 @@ setup)
 		xdg-open "$OAUTH_URL" &> /dev/null
 	fi
 ;;
+ratelimit)
+	curl -i -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" https://api.pushbullet.com/v2/users/me -sw '%{http_code}'
+;;
 *)
 	printUsage
 ;;
