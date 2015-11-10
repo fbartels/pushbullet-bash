@@ -179,6 +179,7 @@ push)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
 
+	# TODO this does not work for pushing links
 	body=""
 	if [ ! -t 0 ]; then
 		# we have something on stdin
