@@ -172,6 +172,7 @@ push)
 	if [ -z "$2" ]; then
 		printUsage
 	fi
+	# TODO for some reason "chrome" seems to not return a dev_id anymore. need to debug.
 	curlres=$(curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" )
 	devices=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep nickname | cut -d'"' -f4)
 	idens=$(echo "$curlres" | tr '{' '\n' | grep active\"\:true | tr ',' '\n' | grep iden | cut -d'"' -f4)
