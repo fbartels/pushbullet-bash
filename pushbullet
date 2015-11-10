@@ -194,17 +194,19 @@ push)
 		type=note
 		title=$4
 		body=$body
-		json="{\"type\":\"note\",\"title\":\"$4\",\"body\":\"$body\""
+		json="{\"type\":\"$type\",\"title\":\"$title\",\"body\":\"$body\""
 	;;
 	link)
 		type=link
 		title=$4
 		body=$body
-		if [ ! -z "$6" ]; then
+		if [ -z "$6" ]; then
+			body=""
 			url=$5
 		else
 			url=$6
 		fi
+		json="{\"type\":\"$type\",\"title\":\"$title\",\"body\":\"$body\",\"url\":\"$url\""
 	;;
 	file)
 		# Api docs: https://docs.pushbullet.com/v2/upload-request/
