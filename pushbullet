@@ -178,18 +178,19 @@ push)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
 
+	body=""
+	if [ ! -t 0 ]; then
+		# we have something on stdin
+		body=$(cat)
+		# remove unprintable characters, or pushbullet API fails
+		body=$(echo "$body"|tr -dc '[:print:]\n')
+	fi
+	if [ ! -z "$5" ]; then
+		body="$5"
+	fi
+
 	case $3 in
 	note)
-		body=""
-		if [ ! -t 0 ]; then
-			# we have something on stdin
-			body=$(cat)
-			# remove unprintable characters, or pushbullet API fails
-			body=$(echo "$body"|tr -dc '[:print:]\n')
-		fi
-		if [ ! -z "$5" ]; then
-			body="$5"
-		fi
 		if [ "$2" = "all" ]; then
 			echo "Sending to All Devices"
 			curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary "{\"type\":\"note\",\"title\":\"$4\",\"body\":\"$body\"}" -X POST)
