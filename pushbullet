@@ -178,7 +178,6 @@ push)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
 
-	# TODO this does not work for pushing links
 	body=""
 	if [ ! -t 0 ]; then
 		# we have something on stdin
@@ -201,11 +200,15 @@ push)
 		type=link
 		title=$4
 		body=$body
-		if [ -z "$6" ]; then
+		if [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
 			body=""
 			url=$5
 		else
 			url=$6
+		fi
+		if [[ ! $url == http://* ]] && [[ ! $url == https://* ]]; then
+			echo "Error: A valid link has to start with http:// or https://"
+			exit 1
 		fi
 		json="{\"type\":\"$type\",\"title\":\"$title\",\"body\":\"$body\",\"url\":\"$url\""
 	;;
