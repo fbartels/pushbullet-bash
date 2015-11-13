@@ -43,8 +43,8 @@ setup - Use OAuth to retrieve a PushBullet API key for pushbullet-bash.
 
 Types: 
 note
-file
 link
+file
 
 Type Parameters: 
 (all parameters must be put inside quotes if more than one word)
