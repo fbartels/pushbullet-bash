@@ -196,13 +196,11 @@ push)
 	note)
 		type=note
 		title="$4"
-		body="$body"
 		json="{\"type\":\"$type\",\"title\":\"$title\",\"body\":\"$body\""
 	;;
 	link)
 		type=link
 		title="$4"
-		body="$body"
 		if [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
 			# TODO this way its not possible to pass a body via stdin if pushing a link
 			body=""
@@ -224,7 +222,6 @@ push)
 		curlres2=$(curl -s -i -X POST $(echo $curlres | "$PROGDIR"/JSON.sh -b | grep upload_url |awk -F\" '{print $(NF-1)}') -F file=@$4)
 
 		type=file
-		body="$body"
 		file_name=$(echo $curlres | "$PROGDIR"/JSON.sh -b | grep file_name |awk -F\" '{print $(NF-1)}')
 		file_type=$(echo $curlres | "$PROGDIR"/JSON.sh -b | grep file_type |awk -F\" '{print $(NF-1)}')
 		file_url=$(echo $curlres | "$PROGDIR"/JSON.sh -b | grep file_url |awk -F\" '{print $(NF-1)}')
