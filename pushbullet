@@ -214,6 +214,10 @@ push)
 		json="{\"type\":\"$type\",\"title\":\"$title\",\"body\":\"$body\",\"url\":\"$url\""
 	;;
 	file)
+		if [[ -z $4 ]] || [[ ! -f $4 ]]; then
+			echo "Error: no valid file to push was specified"
+			exit 1
+		fi
 		# Api docs: https://docs.pushbullet.com/v2/upload-request/
 		mimetype=$(file -i -b $4)
 		curlres=$(curl -s "$API_URL/upload-request" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" \
