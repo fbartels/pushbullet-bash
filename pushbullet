@@ -186,8 +186,12 @@ push)
 		# remove unprintable characters, or pushbullet API fails
 		body=$(echo "$body"|tr -dc '[:print:]\n')
 	fi
-	if [ ! -z "$5" ]; then
+
+	if [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
+		url="$5"
+	else
 		body="$5"
+		url="$6"
 	fi
 
 	# replace newlines with an escape sequence
@@ -200,13 +204,6 @@ push)
 	;;
 	link)
 		type=link
-		if [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
-			# TODO this way its not possible to pass a body via stdin if pushing a link
-			body=""
-			url="$5"
-		else
-			url="$6"
-		fi
 		if [[ ! $url == http://* ]] && [[ ! $url == https://* ]]; then
 			echo "Error: A valid link has to start with http:// or https://"
 			exit 1
