@@ -178,6 +178,7 @@ push)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
 
+	title="$4"
 	body=""
 	if [ ! -t 0 ]; then
 		# we have something on stdin
@@ -195,12 +196,10 @@ push)
 	case $3 in
 	note)
 		type=note
-		title="$4"
 		json="{\"type\":\"$type\",\"title\":\"$title\",\"body\":\"$body\""
 	;;
 	link)
 		type=link
-		title="$4"
 		if [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
 			# TODO this way its not possible to pass a body via stdin if pushing a link
 			body=""
