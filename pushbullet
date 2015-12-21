@@ -107,7 +107,7 @@ pushes)
 		curl -s "$API_URL/pushes?active=true" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | getactivepushes
 		;;
 	recent)
-		# set LASTMODIFIED (unix time) to zero if emptry
+		# set LASTMODIFIED (unix time) to zero if empty
 		if [ -z "$PB_LASTMODIFIED" ]; then
 			PB_LASTMODIFIED=0
 			echo "PB_LASTMODIFIED=0" >> $PB_CONFIG
@@ -184,7 +184,7 @@ push)
 		# we have something on stdin
 		body=$(cat)
 		# remove unprintable characters, or pushbullet API fails
-		body=$(echo "$body"|tr -dc '[:print:]\n')
+		body=$(echo "$body"|tr -dc '[:print:]\n'|tr '"' "'")
 	fi
 
 	if [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
