@@ -252,8 +252,8 @@ push)
 	checkCurlOutput "$curlres"
 ;;
 setup)
-	CLIENT_ID=u1DAx9KcrmMRUjhcMb3qWOZluwE2MjKa
-	REDIRECT_URI="https%3A%2F%2Ffbartels.github.io%2Fpushbullet-bash"
+	CLIENT_ID=RP56dyRen86HaaLnXBevnrDTHT8fTcr6
+	REDIRECT_URI="https://Red5d.github.io/pushbullet-bash"
 	OAUTH_URL="https://www.pushbullet.com/authorize?client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI&response_type=token&scope=everything"
 	echo
 	echo "Please open the following URL manually if it did not open automatically:"
