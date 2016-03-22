@@ -60,15 +60,15 @@ delete all - Delete all pushes.
 pull \$iden - Display a specific push.
 setup - Use OAuth to retrieve a PushBullet API key for pushbullet-bash.
 
-Types: 
+Types:
 note
 link
 file
 
-Type Parameters: 
+Type Parameters:
 (all parameters must be put inside quotes if more than one word)
 \"note\" type: 	give the title and an optional message body.
-\"link\" type: 	give the title of the link, an optional message and the url.
+\"link\" type: 	give an optional title, an optional message and the url. The optional message can also be given last.
 \"file\" type: 	give the path to the file and an optional message body.
 Hint:  The message body can also be given via stdin, leaving the message parameter empty.
 "
@@ -221,7 +221,11 @@ push)
 		body=$(echo "$body"|tr -dc '[:print:]\n'|tr '"' "'")
 	fi
 
-	if [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
+	if [[ $4 == http://* ]] || [[ $4 == https://* ]]; then
+		body=${body:-$5}
+		url="$4"
+	elif [[ $5 == http://* ]] || [[ $5 == https://* ]]; then
+		body=${body:-$6}
 		url="$5"
 	else
 		body=${body:-$5}
