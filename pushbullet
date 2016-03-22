@@ -14,7 +14,11 @@ info() {
 }
 
 err() {
-	echo $@ > /dev/stderr
+	if [[ -w /dev/stderr ]]; then
+		echo $@ > /dev/stderr
+	else
+		echo $@
+	fi
 }
 
 if [ ! $(which curl) ]; then
