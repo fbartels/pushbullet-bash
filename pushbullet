@@ -90,7 +90,6 @@ function getactivepushes () {
 		fi
 		echo "$iden:$type:$title:$modified"
 	done
-	# | tail -n+3 | awk -F ":" '{print $4}'
 }
 
 checkCurlOutput() {
