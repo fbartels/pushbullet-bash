@@ -119,7 +119,6 @@ esac
 
 case $1 in
 create-device)
-	# todo check if there is already a device with this hostname (pushbullet would just create it again otherwise)
 	# create a device in pushbullet named like the current hostname
 	if [ ! -z $($0 list | grep -Fx $(hostname)) ]; then
 		err "A device already exists with your hostname"
