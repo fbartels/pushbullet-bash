@@ -121,12 +121,14 @@ case $1 in
 create-device)
 	# todo check if there is already a device with this hostname (pushbullet would just create it again otherwise)
 	# create a device in pushbullet named like the current hostname
-	if [ ! -z $($0 list | grep $(hostname)) ]; then
+	if [ ! -z $($0 list | grep -Fx $(hostname)) ]; then
 		err "A device already exists with your hostname"
 		exit 1
 	fi
-	curlres=$(curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" --data-binary "{\"nickname\":\"$(hostname)\",\"icon\":\"system\"}" -X POST)
+	curlres=$(curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" \
+	--data-binary "{\"nickname\":\"$(hostname)\",\"model\":\"Created by pushbullet-bash\",\"icon\":\"system\"}" -X POST)
 	checkCurlOutput "$curlres"
+	info "Device has been created"
 	;;
 list)
 	echo "Available devices:"
