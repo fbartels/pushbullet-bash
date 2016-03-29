@@ -61,6 +61,7 @@ delete all - Delete all pushes.
 pull \$iden - Display a specific push.
 setup - Use OAuth to retrieve a PushBullet API key for pushbullet-bash.
 create-device - create a device in pushbullet named like the current hostname.
+chat device \$email - create a chat with the passed email. Does not send a message.
 
 Types:
 note
@@ -135,9 +136,27 @@ list)
 	curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"nickname\" | sort -n | cut -d '"' -f4
 	echo "all"
 	echo
-	echo "Contacts:"
+	echo "Chats/Contacts:"
 	echo "------------------"
-	curl -s "$API_URL/contacts" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"email\" | sort -n | cut -d '"' -f4
+	#contacts=$(curl -s "$API_URL/contacts" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"email\" | cut -d '"' -f4)
+	chats=$(curl -s "$API_URL/chats" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"email\": | cut -d '"' -f4)
+	echo "$chats" | sort -n
+	;;
+chat)
+	case $2 in
+	create)
+		# create a chat with the email in $3 so that the address shows up in the list command
+		if [[ ! "$3" == *@* ]]; then
+			err "$3 is no email address"
+			exit 1
+		fi
+		# as long as the object is an email the chat will either be created or already exists
+		curlres=$(curl -s "$API_URL/chats" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary \{\"email\":\"$3\"\} -X POST)
+		;;
+	*)
+		printUsage
+		;;
+	esac
 	;;
 pushes)
 	case $2 in
@@ -292,6 +311,8 @@ push)
 	elif [[ "$2" == *@* ]]; then
 		info "Sending to email address $2"
 		json="$json,\"email\":\"$2\"}"
+		# since it's an email we are also creating a chat
+		$0 chat create $2
 	# $2 must be a channel_tag if $lineNum is empty.
 	elif [ -z "$lineNum" ]; then
 		info "Sending to channel $2"
