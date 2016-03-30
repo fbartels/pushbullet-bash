@@ -163,7 +163,7 @@ pushes)
 	active)
 		info "Your active pushes:"
 		info "------------------"
-		curl -s "$API_URL/pushes?active=true" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | getactivepushes
+		curl -s "$API_URL/pushes?active=true" -H "Access-Token: $PB_API_KEY" | getactivepushes
 		;;
 	recent)
 		# set LASTMODIFIED (unix time) to zero if empty
