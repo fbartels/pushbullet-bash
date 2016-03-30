@@ -181,6 +181,7 @@ pushes)
 		--data-urlencode modified_after="$PB_LASTMODIFIED" \
 		--get \
 		"$API_URL/pushes" | getactivepushes
+		# TODO how to get $modified for the latest (first) entry?
 		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
 		;;
 	last24h)
