@@ -215,7 +215,9 @@ delete)
 		;;
 	all)
 		info "deleting all pushes"
-		curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" -X DELETE)
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--request DELETE \
+		"$API_URL/pushes")
 		checkCurlOutput "$curlres"
 		;;
 	except)
@@ -225,7 +227,10 @@ delete)
 		fi
 		info "deleting all pushes except the last $3"
 		number=$(($3+1))
-		allpushes=$(curl -s "$API_URL/pushes?active=true" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | "$PROGDIR"/JSON.sh -l)
+		allpushes=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--data-urlencode active="true" \
+		--get \
+		"$API_URL/pushes" | "$PROGDIR"/JSON.sh -l)
 		activepushes=$(echo "$allpushes" | egrep "\[\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done | tail -n "+$number")
 		for id in $activepushes; do
 			iden=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"iden\"\]"|cut -f 2 | cut -d'"' -f 2)
@@ -235,7 +240,9 @@ delete)
 		;;
 	*)
 		info "deleting $2"
-		curlres=$(curl -s "$API_URL/pushes/$2" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" -X DELETE)
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--request DELETE \
+		"$API_URL/pushes/$2")
 		checkCurlOutput "$curlres"
 		;;
 	esac
@@ -246,7 +253,9 @@ pull)
 		printUsage
 		;;
 	*)
-		curl -s "$API_URL/pushes/$2" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | "$PROGDIR"/JSON.sh -b
+		curl --silent --header "Access-Token: $PB_API_KEY" \
+		--header "Content-Type: application/json" \
+		"$API_URL/pushes/$2" | "$PROGDIR"/JSON.sh -b
 		;;
 	esac
 	;;
@@ -254,7 +263,9 @@ push)
 	if [ -z "$2" ]; then
 		printUsage
 	fi
-	curlres=$(curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" )
+	curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+	"$API_URL/devices")
+	# fail early on if token is invalid
 	checkCurlOutput "$curlres"
 	devices=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep \"nickname\" | cut -d'"' -f4)
 	idens=$(echo "$curlres" | tr '{' '\n' | grep active\"\:true | tr ',' '\n' | grep iden | cut -d'"' -f4)
@@ -311,9 +322,14 @@ push)
 		fi
 		# Api docs: https://docs.pushbullet.com/v2/upload-request/
 		mimetype=$(file -i -b $file)
-		curlres=$(curl -s "$API_URL/upload-request" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" \
-		--data-binary "{\"file_name\":\"$file\",\"file_type\":\"${mimetype%:*}\"}" -X POST)
-		curlres2=$(curl -s -i -X POST $(echo $curlres | "$PROGDIR"/JSON.sh -b | grep upload_url |awk -F\" '{print $(NF-1)}') -F file=@$file)
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--header "Content-Type: application/json" \
+		--data-binary "{\"file_name\":\"$file\",\"file_type\":\"${mimetype%:*}\"}" \
+		--request POST \
+		"$API_URL/upload-request")
+		curlres2=$(curl --silent --include --request POST \
+		$(echo $curlres | "$PROGDIR"/JSON.sh -b | grep upload_url | awk -F\" '{print $(NF-1)}') \
+		-F file=@$file)
 
 		type=file
 		file_name=$(echo $curlres | "$PROGDIR"/JSON.sh -b | grep file_name |awk -F\" '{print $(NF-1)}')
@@ -344,7 +360,11 @@ push)
 		info "Sending to device $2"
 		json="$json,\"device_iden\":\"$dev_id\"}"
 	fi
-	curlres=$(curl -s "$API_URL/pushes" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary "$json" -X POST)
+	curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+	--header "Content-type: application/json" \
+	--data-binary "$json" \
+	--request POST \
+	"$API_URL/pushes")
 	checkCurlOutput "$curlres"
 ;;
 setup)
@@ -365,7 +385,10 @@ setup)
 	fi
 ;;
 ratelimit)
-	curl -i -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" https://api.pushbullet.com/v2/users/me -sw '%{http_code}'
+	curl --header "Access-Token: $PB_API_KEY" \
+	--include \
+	--write-out '%{http_code}' \
+	"$API_URL/users/me"
 	echo
 ;;
 *)
