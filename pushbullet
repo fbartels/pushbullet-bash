@@ -387,7 +387,6 @@ setup)
 ratelimit)
 	curl --header "Access-Token: $PB_API_KEY" \
 	--include \
-	--write-out '%{http_code}' \
 	"$API_URL/users/me"
 	echo
 ;;
