@@ -42,6 +42,7 @@ while read line; do
 	case $line in
 	*tickle*push*)
 		info new push
+		# for every line in recent call pushbullet pull $iden
 		pushbullet -q pushes recent
 	;;
 	*type*nop*)
