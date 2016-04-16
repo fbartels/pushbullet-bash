@@ -107,6 +107,11 @@ checkCurlOutput() {
 	fi
 }
 
+checkPagination() {
+	cursor=$(echo "$1" | tr ',' '\n' | grep \"cursor\": | sort -n | cut -d '"' -f4)
+	echo $cursor
+}
+
 case $1 in
 -q|--quiet)
 	QUIET=1
@@ -136,17 +141,41 @@ create-device)
 list)
 	echo "Available devices:"
 	echo "------------------"
-	curl --silent --header "Access-Token: $PB_API_KEY" \
-	"$API_URL/devices" | tr ',' '\n' | grep \"nickname\" | sort -n | cut -d '"' -f4
+	curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+	"$API_URL/devices")
+
+	# check if query needs pagination
+	devices=$curlres
+	until [ -z $(checkPagination "$curlres") ]; do
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--data-urlencode cursor="$(checkPagination "$curlres")" \
+		--get \
+		"$API_URL/devices")
+		devices="$devices $curlres"
+	done
+
+	echo $devices | tr ',' '\n' | grep \"nickname\": | sort -n | cut -d '"' -f4
 	echo "all"
 	echo
+
 	echo "Chats/Contacts:"
 	echo "------------------"
 	#contacts=$(curl --silent --header "Access-Token: $PB_API_KEY" \
 	#"$API_URL/contacts" | tr ',' '\n' | grep \"email\" | cut -d '"' -f4)
-	chats=$(curl --silent --header "Access-Token: $PB_API_KEY" \
-	"$API_URL/chats" | tr ',' '\n' | grep \"email\": | cut -d '"' -f4)
-	echo "$chats" | sort -n
+	curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+	"$API_URL/chats")
+
+	# check if query needs pagination
+	chats=$curlres
+	until [ -z $(checkPagination "$curlres") ]; do
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--data-urlencode cursor="$(checkPagination "$curlres")" \
+		--get \
+		"$API_URL/chats")
+		devices="$chats $curlres"
+	done
+
+	echo $chats | tr ',' '\n' | grep \"email\": | cut -d '"' -f4 | sort -n
 	;;
 chat)
 	case $2 in
@@ -177,6 +206,7 @@ pushes)
 		--data-urlencode active="true" \
 		--get \
 		"$API_URL/pushes" | getactivepushes
+		# pagination
 		;;
 	recent)
 		# set LASTMODIFIED (unix time) to zero if empty
@@ -191,6 +221,7 @@ pushes)
 		--data-urlencode modified_after="$PB_LASTMODIFIED" \
 		--get \
 		"$API_URL/pushes" | getactivepushes
+		# pagination
 		# TODO how to get $modified for the latest (first) entry?
 		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
 		;;
@@ -202,6 +233,7 @@ pushes)
 		--data-urlencode modified_after="$(date -d "1 day ago" +%s)" \
 		--get \
 		"$API_URL/pushes" | getactivepushes
+		# pagination
 		;;
 	*)
 		printUsage
@@ -267,8 +299,19 @@ push)
 	"$API_URL/devices")
 	# fail early on if token is invalid
 	checkCurlOutput "$curlres"
-	devices=$(echo "$curlres" | tr '{' '\n' | tr ',' '\n' | grep \"nickname\" | cut -d'"' -f4)
-	idens=$(echo "$curlres" | tr '{' '\n' | grep active\"\:true | tr ',' '\n' | grep iden | cut -d'"' -f4)
+
+	# check if query needs pagination
+	curlres2=$curlres
+	until [ -z $(checkPagination "$curlres") ]; do
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--data-urlencode cursor="$(checkPagination "$curlres")" \
+		--get \
+		"$API_URL/devices")
+		curlres2="$curlres2 $curlres"
+	done
+
+	devices=$(echo "$curlres2" | tr '{' '\n' | tr ',' '\n' | grep \"nickname\" | cut -d'"' -f4)
+	idens=$(echo "$curlres2" | tr '{' '\n' | grep active\"\:true | tr ',' '\n' | grep iden | cut -d'"' -f4)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
 
