@@ -41,11 +41,14 @@ fi
 while read line; do
 	case $line in
 	*tickle*push*)
-		echo new push
+		info new push
+		pushbullet -q pushes recent
+	;;
+	*type*nop*)
+		continue
 	;;
 	*)
-		echo $line
+		err $line
 	;;
 esac
 done < <(wscat -c wss://stream.pushbullet.com/websocket/$PB_API_KEY)
-
