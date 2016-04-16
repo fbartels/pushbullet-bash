@@ -125,21 +125,27 @@ create-device)
 		err "A device already exists with your hostname"
 		exit 1
 	fi
-	curlres=$(curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" \
-	--data-binary "{\"nickname\":\"$(hostname)\",\"model\":\"Created by pushbullet-bash\",\"icon\":\"system\"}" -X POST)
+	curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+	--header 'Content-Type: application/json' \
+	--data-binary "{\"nickname\":\"$(hostname)\",\"model\":\"Created by pushbullet-bash\",\"icon\":\"system\"}" \
+	--request POST \
+	"$API_URL/devices")
 	checkCurlOutput "$curlres"
 	info "Device has been created"
 	;;
 list)
 	echo "Available devices:"
 	echo "------------------"
-	curl -s "$API_URL/devices" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"nickname\" | sort -n | cut -d '"' -f4
+	curl --silent --header "Access-Token: $PB_API_KEY" \
+	"$API_URL/devices" | tr ',' '\n' | grep \"nickname\" | sort -n | cut -d '"' -f4
 	echo "all"
 	echo
 	echo "Chats/Contacts:"
 	echo "------------------"
-	#contacts=$(curl -s "$API_URL/contacts" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"email\" | cut -d '"' -f4)
-	chats=$(curl -s "$API_URL/chats" -H "Access-Token: $PB_API_KEY" -H "Content-Type: application/json" | tr ',' '\n' | grep \"email\": | cut -d '"' -f4)
+	#contacts=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+	#"$API_URL/contacts" | tr ',' '\n' | grep \"email\" | cut -d '"' -f4)
+	chats=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+	"$API_URL/chats" | tr ',' '\n' | grep \"email\": | cut -d '"' -f4)
 	echo "$chats" | sort -n
 	;;
 chat)
@@ -151,7 +157,11 @@ chat)
 			exit 1
 		fi
 		# as long as the object is an email the chat will either be created or already exists
-		curlres=$(curl -s "$API_URL/chats" -H "Access-Token: $PB_API_KEY" -H "Content-type: application/json" --data-binary \{\"email\":\"$3\"\} -X POST)
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--header "Content-Type: application/json" \
+		--data-binary \{\"email\":\"$3\"\} \
+		--request POST \
+		"$API_URL/chats")
 		;;
 	*)
 		printUsage
