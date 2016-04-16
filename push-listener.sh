@@ -39,6 +39,13 @@ if [[ -z "$PB_API_KEY" ]] && [[ "$1" != "setup" ]]; then
 fi
 
 while read line; do
-	echo $line
+	case $line in
+	*tickle*push*)
+		echo new push
+	;;
+	*)
+		echo $line
+	;;
+esac
 done < <(wscat -c wss://stream.pushbullet.com/websocket/$PB_API_KEY)
 
