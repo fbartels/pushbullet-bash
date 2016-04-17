@@ -175,15 +175,15 @@ create-device)
 	info "Device has been created"
 	;;
 list)
-	echo "Available devices:"
-	echo "------------------"
+	info "Available devices:"
+	info "------------------"
 	devices=$(getDevices)
 	echo "$devices" | tr ',' '\n' | grep \"nickname\": | sort -n | cut -d '"' -f4
-	echo "all"
-	echo
+	info "all"
+	info
 
-	echo "Chats/Contacts:"
-	echo "------------------"
+	info "Chats/Contacts:"
+	info "------------------"
 	chats=$(getChats)
 	echo "$chats" | tr ',' '\n' | grep \"email\": | cut -d '"' -f4 | sort -n
 	;;
@@ -313,6 +313,7 @@ push)
 	idens=$(echo "$curlres" | tr '{' '\n' | grep active\"\:true | tr ',' '\n' | grep iden | cut -d'"' -f4)
 	lineNum=$(echo "$devices" | grep -i -n "$2" | cut -d: -f1)
 	dev_id=$(echo "$idens" | sed -n $lineNum'p')
+	dev_name=$(echo "$devices" | sed -n $lineNum'p')
 
 	title="$4"
 	body=""
@@ -399,7 +400,7 @@ push)
 		json="$json,\"channel_tag\":\"$2\"}"
 	# in all other cases $2 must be the identifier of a device.
 	else
-		info "Sending to device $2"
+		info "Sending to device $dev_name"
 		json="$json,\"device_iden\":\"$dev_id\"}"
 	fi
 	curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
