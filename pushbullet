@@ -175,12 +175,24 @@ getPushes() {
 		iden=/$iden
 	fi
 
-	curl --silent --header "Access-Token: $PB_API_KEY" \
+	curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
 	--data-urlencode active="$active" \
 	--data-urlencode modified_after="$modified" \
 	--get \
-	"$API_URL/pushes$iden"
-	# TODO implement pagination
+	"$API_URL/pushes$iden")
+	checkCurlOutput "$curlres"
+	echo $curlres | getactivepushes
+
+	# check if query needs pagination
+	until [ -z "$(checkPagination "$curlres")" ]; do
+		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
+		--data-urlencode active="$active" \
+		--data-urlencode modified_after="$modified" \
+		--data-urlencode cursor="$(checkPagination "$curlres")" \
+		--get \
+		"$API_URL/pushes$iden")
+		echo $curlres | getactivepushes
+	done
 }
 
 case $1 in
@@ -247,7 +259,7 @@ pushes)
 	active)
 		info "Your active pushes:"
 		info "------------------"
-		getPushes | getactivepushes
+		getPushes
 		;;
 	recent)
 		# set LASTMODIFIED (unix time) to zero if empty
@@ -257,14 +269,14 @@ pushes)
 		fi
 		info "Your recent pushes:"
 		info "------------------"
-		getPushes -m $PB_LASTMODIFIED | getactivepushes
+		getPushes -m $PB_LASTMODIFIED
 		# TODO how to get $modified for the latest (first) entry?
 		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
 		;;
 	last24h)
 		info "Your pushes from the last 24 hours:"
 		info "------------------"
-		getPushes -m $(date -d "1 day ago" +%s) | getactivepushes
+		getPushes -m $(date -d "1 day ago" +%s)
 		;;
 	*)
 		printUsage
