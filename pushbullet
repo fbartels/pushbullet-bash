@@ -148,6 +148,39 @@ getDevices() {
 	echo "$devices"
 }
 
+getPushes() {
+	local OPTIND a i m
+	while getopts "a:i:m" OPTION; do
+		case "$OPTION" in
+		a)
+			active="$OPTARG"
+			;;
+		i)
+			iden="$OPTARG"
+			;;
+		m)
+			lastmodified="$OPTARG"
+			;;
+		esac
+	done
+	shift $((OPTIND-1))
+	# if not set, set lastmodified to 0 to get all pushes
+	if [ -z $lastmodified ]; then
+		lastmodified=0
+	fi
+	# if $iden is set, add leading slash
+	if [ ! -z $iden ]; then
+		iden=/$iden
+	fi
+
+	curl --silent --header "Access-Token: $PB_API_KEY" \
+	--data-urlencode active="$active" \
+	--data-urlencode modified_after="$lastmodified" \
+	--get \
+	"$API_URL/pushes$iden"
+	# TODO implement pagination
+}
+
 case $1 in
 -q|--quiet)
 	QUIET=1
@@ -212,11 +245,7 @@ pushes)
 	active)
 		info "Your active pushes:"
 		info "------------------"
-		curl --silent --header "Access-Token: $PB_API_KEY" \
-		--data-urlencode active="true" \
-		--get \
-		"$API_URL/pushes" | getactivepushes
-		# pagination
+		getPushes -a true | getactivepushes
 		;;
 	recent)
 		# set LASTMODIFIED (unix time) to zero if empty
@@ -226,24 +255,14 @@ pushes)
 		fi
 		info "Your recent pushes:"
 		info "------------------"
-		curl --silent --header "Access-Token: $PB_API_KEY" \
-		--data-urlencode active="true" \
-		--data-urlencode modified_after="$PB_LASTMODIFIED" \
-		--get \
-		"$API_URL/pushes" | getactivepushes
-		# pagination
+		getPushes -a true -m $PB_LASTMODIFIED | getactivepushes
 		# TODO how to get $modified for the latest (first) entry?
 		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
 		;;
 	last24h)
 		info "Your pushes from the last 24 hours:"
 		info "------------------"
-		curl --silent --header "Access-Token: $PB_API_KEY" \
-		--data-urlencode active="true" \
-		--data-urlencode modified_after="$(date -d "1 day ago" +%s)" \
-		--get \
-		"$API_URL/pushes" | getactivepushes
-		# pagination
+		getPushes -a true -m $(date -d "1 day ago" +%s) | getactivepushes
 		;;
 	*)
 		printUsage
