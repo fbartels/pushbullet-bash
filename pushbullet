@@ -80,14 +80,16 @@ exit 1
 
 function getactivepushes () {
 	# first command in a function reads stdin
-	allpushes=$("$PROGDIR"/JSON.sh -l)
+	allpushes=$("$PROGDIR"/JSON.sh -b)
 	# TODO simplify with the powers of json.sh
-	activepushes=$(echo "$allpushes" | egrep "\[[0-9]+,\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done)
+	# TODO how to get added index, which was created through joining json responses (the leading number)?
+	activepushes=$(echo "$allpushes" | egrep "\"pushes\",[0-9]+,\"active\"\].*true" \
+	| while read line; do echo "$line" | cut -f 3 -d ,; done)
 	for id in $activepushes; do
-		iden=$(echo "$allpushes" | grep "^\[[0-9]+,\"pushes\",$id,\"iden\"\]"|cut -f 2)
-		title=$(echo "$allpushes" | grep "^\[[0-9]+,\"pushes\",$id,\"title\"\]"|cut -f 2)
-		modified=$(echo "$allpushes" | grep "^\[[0-9]+,\"pushes\",$id,\"modified\"\]"|cut -f 2)
-		type=$(echo "$allpushes" | grep "^\[[0-9]+,\"pushes\",$id,\"type\"\]"|cut -f 2)
+		iden=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"iden\"\]"|cut -f 2)
+		title=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"title\"\]"|cut -f 2)
+		modified=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"modified\"\]"|cut -f 2)
+		type=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"type\"\]"|cut -f 2)
 		if [[ -z "$title" ]]; then
 			title="(no title)"
 		fi
@@ -109,6 +111,9 @@ checkCurlOutput() {
 	elif [[ "$1" == '{"accounts":[],"blocks":[],"channels":[],"chats":[],"clients":[],"contacts":[],"devices":[],"grants":[],"pushes":[],"profiles":[],"subscriptions":[],"texts":[]}' ]]; then
 		# "empty" response
 		exit 0
+	elif [[ "$1" == '{"accounts":[],"blocks":[],"channels":[],"chats":[],"clients":[],"contacts":[],"devices":[],"grants":[],"pushes":[],"profiles":[],"subscriptions":[],"texts":[],"cursor":'* ]]; then
+		# only next cursor, otherwise empty response
+		break
 	elif [[ "$res" != "created" ]] && [[ ! "$1" == "{}" ]]; then
 		err "Error submitting the request. The error message was:" "$1"
 		exit 1
@@ -117,8 +122,7 @@ checkCurlOutput() {
 
 # function prints the cursor function if another page is needed
 checkPagination() {
-	cursor=$(echo "$1" | JSON.sh -l | tail -n 1 | cut -d '"' -f4)
-	#cursor=$(echo "$1" | tr ',' '\n' | grep \"cursor\": | cut -d '"' -f4)
+	cursor=$(echo "$1" | tr ',' '\n' | grep \"cursor\": | cut -d '"' -f4)
 	echo "$cursor"
 }
 
@@ -158,7 +162,7 @@ getDevices() {
 }
 
 getPushes() {
-	# function gets a list of pushes
+	# function gets a list of pushes (as a json object)
 	local OPTIND
 	while getopts ":a:i:m:" OPTION; do
 		case "$OPTION" in
@@ -178,9 +182,6 @@ getPushes() {
 	# default to true to only get active pushes if not set otherwise
 	active=${active:-true}
 
-	# default to not giving the json response
-	json=${json:-false}
-
 	# default to 0 to get all pushes if not set otherwise
 	modified=${modified:-0}
 
@@ -198,7 +199,7 @@ getPushes() {
 	response="[ $curlres"
 
 	# check if query needs pagination, also stop requesting more pages if the cursor repeats
-	until [ -z "$(checkPagination "$curlres")" ] || [ "$(checkPagination "$curlres")" == "$prevcursor" ]; do
+	until [ -z "$(checkPagination "$curlres")" ]; do
 		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
 		--data-urlencode active="$active" \
 		--data-urlencode modified_after="$modified" \
@@ -207,7 +208,7 @@ getPushes() {
 		"$API_URL/pushes$iden")
 		response="$response, $curlres"
 		prevcursor="$(checkPagination "$curlres")"
-		#checkCurlOutput "$curlres"
+		checkCurlOutput "$curlres"
 	done
 	echo "$response ]"
 }
@@ -274,7 +275,7 @@ chat)
 pushes)
 	case $2 in
 	debug)
-		getPushes 
+		getPushes
 		;;
 	active)
 		info "Your active pushes:"
@@ -322,7 +323,7 @@ delete)
 		fi
 		info "deleting all pushes except the last $3"
 		number=$(($3+1))
-		allpushes=$(getPushes -j true | "$PROGDIR"/JSON.sh -l)
+		allpushes=$(getPushes -j true | "$PROGDIR"/JSON.sh -b)
 		activepushes=$(echo "$allpushes" | egrep "\[\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done | tail -n "+$number")
 		for id in $activepushes; do
 			iden=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"iden\"\]"|cut -f 2 | cut -d'"' -f 2)
