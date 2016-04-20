@@ -323,10 +323,11 @@ delete)
 		fi
 		info "deleting all pushes except the last $3"
 		number=$(($3+1))
-		allpushes=$(getPushes -j true | "$PROGDIR"/JSON.sh -b)
-		activepushes=$(echo "$allpushes" | egrep "\[\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done | tail -n "+$number")
+		allpushes=$(getPushes | "$PROGDIR"/JSON.sh -b)
+		# TODO adapt for pagination
+		activepushes=$(echo "$allpushes" | egrep "\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done | tail -n "+$number")
 		for id in $activepushes; do
-			iden=$(echo "$allpushes" | grep "^\[\"pushes\",$id,\"iden\"\]"|cut -f 2 | cut -d'"' -f 2)
+			iden=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"iden\"\]"|cut -f 2 | cut -d'"' -f 2)
 			# call pushbullet-bash itself to delete the pushes
 			$0 delete "$iden"
 		done
