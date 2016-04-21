@@ -14,8 +14,8 @@ pb() {
 		START_TIME=$SECONDS
 		eval "$@"
 		EXITCODE=$?
-		ELAPSED_TIME=$(($SECONDS - $START_TIME))
-		TIME="$(($ELAPSED_TIME / 60)) min $(($ELAPSED_TIME % 60)) sec"
+		ELAPSED_TIME=$((SECONDS - START_TIME))
+		TIME="$((ELAPSED_TIME / 60)) min $((ELAPSED_TIME % 60)) sec"
 	else
 		TIME="duration unknown"
 	fi
