@@ -1,5 +1,7 @@
 #! /bin/bash
-set -e # set -e to avoid "EXPECTED value GOT EOF" errors when no pushes are returned
+
+# avoid "EXPECTED value GOT EOF" errors when no pushes are returned
+set -e
 
 # Bash interface to the PushBullet api.
 # Author: Red5d - https://github.com/Red5d
@@ -187,7 +189,7 @@ getPushes() {
 	# default to 0 to get all pushes if not set otherwise
 	modified=${modified:-0}
 
-	# if $iden is not set, add leading slash
+	# if $iden is set, add leading slash
 	if [ ! -z "$iden" ]; then
 		iden="/$iden"
 	fi
@@ -354,7 +356,7 @@ pull)
 		printUsage
 		;;
 	*)
-		getPushes -i $2 -j true | "$PROGDIR"/JSON.sh -b
+		getPushes -i $2 | "$PROGDIR"/JSON.sh -b
 		;;
 	esac
 	;;
