@@ -113,7 +113,8 @@ checkCurlOutput() {
 		exit 0
 	elif [[ "$1" == '{"accounts":[],"blocks":[],"channels":[],"chats":[],"clients":[],"contacts":[],"devices":[],"grants":[],"pushes":[],"profiles":[],"subscriptions":[],"texts":[],"cursor":'* ]]; then
 		# only next cursor, otherwise empty response
-		break
+		# suppress error when calling break outside of loop
+		break 2&> /dev/null
 	elif [[ "$res" != "created" ]] && [[ ! "$1" == "{}" ]]; then
 		err "Error submitting the request. The error message was:" "$1"
 		exit 1
