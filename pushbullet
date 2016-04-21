@@ -1,4 +1,5 @@
 #! /bin/bash
+set -e # set -e to avoid "EXPECTED value GOT EOF" errors when no pushes are returned
 
 # Bash interface to the PushBullet api.
 # Author: Red5d - https://github.com/Red5d
@@ -110,7 +111,7 @@ checkCurlOutput() {
 		exit 1
 	elif [[ "$1" == '{"accounts":[],"blocks":[],"channels":[],"chats":[],"clients":[],"contacts":[],"devices":[],"grants":[],"pushes":[],"profiles":[],"subscriptions":[],"texts":[]}' ]]; then
 		# "empty" response
-		exit 0
+		return 0
 	elif [[ "$1" == '{"accounts":[],"blocks":[],"channels":[],"chats":[],"clients":[],"contacts":[],"devices":[],"grants":[],"pushes":[],"profiles":[],"subscriptions":[],"texts":[],"cursor":'* ]]; then
 		# only next cursor, otherwise empty response
 		# suppress error when calling break outside of loop
@@ -291,9 +292,15 @@ pushes)
 		fi
 		info "Your recent pushes:"
 		info "------------------"
-		getPushes -m $PB_LASTMODIFIED | getactivepushes
-		# TODO how to get $modified for the latest (first) entry?
-		sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$(date +%s)/" $PB_CONFIG
+		pushes=$(getPushes -m $PB_LASTMODIFIED | getactivepushes)
+		echo "$pushes"
+		# get the modififed timestamp of the newest push
+		pushes=$(echo "$pushes" | head -n 1)
+		modified=${pushes##*:}
+		# only update PB_LASTMODIFIED if $modified has a value
+		if [ ! -z $modified ]; then
+			sed --follow-symlinks -i "s/^PB_LASTMODIFIED=.*/PB_LASTMODIFIED=$modified/" $PB_CONFIG
+		fi
 		;;
 	last24h)
 		info "Your pushes from the last 24 hours:"
