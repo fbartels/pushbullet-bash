@@ -38,15 +38,33 @@ if [[ -z "$PB_API_KEY" ]] && [[ "$1" != "setup" ]]; then
         exit 1
 fi
 
-while read line; do
+displayPushes(){
+	while read line; do
+		iden=${line%%:*}
+		# call pushbullet-bash to display push if we have an iden
+		if [ ! -z $iden ]; then
+			# use tr to remove quotes around iden
+			pushbullet pull $(echo "$iden" | tr -d '"')
+		fi
+	# use tac to display the oldest first instead of the newest
+	done < <(pushbullet -q pushes recent | tac)
+}
+
+# list pushes once at start
+displayPushes
+
+# listen to websocket for new pushes
+while read -r line ; do
 	case $line in
 	*tickle*push*)
-		info new push
 		# for every line in recent call pushbullet pull $iden
-		pushbullet -q pushes recent
+		displayPushes
 	;;
 	*type*nop*)
 		continue
+	;;
+	*type*push*)
+		info ephemerals
 	;;
 	*)
 		err $line
