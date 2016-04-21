@@ -81,18 +81,18 @@ exit 1
 function getactivepushes () {
 	# first command in a function reads stdin
 	allpushes=$("$PROGDIR"/JSON.sh -b)
-	# TODO simplify with the powers of json.sh
-	# TODO how to get added index, which was created through joining json responses (the leading number)?
 	activepushes=$(echo "$allpushes" | egrep "\"pushes\",[0-9]+,\"active\"\].*true" \
-	| while read line; do echo "$line" | cut -f 3 -d ,; done)
+	| while read line; do id=${line%,*}; echo $id; done)
 	for id in $activepushes; do
-		iden=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"iden\"\]"|cut -f 2)
-		title=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"title\"\]"|cut -f 2)
-		modified=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"modified\"\]"|cut -f 2)
-		type=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"type\"\]"|cut -f 2)
-		if [[ -z "$title" ]]; then
-			title="(no title)"
-		fi
+		# use grep -F to not interpred ] (which is also stored in $id)
+		iden=$(echo "$allpushes" | grep -F "$id,\"iden\"]" |cut -f 2)
+		title=$(echo "$allpushes" | grep -F "$id,\"title\"]"|cut -f 2)
+		modified=$(echo "$allpushes" | grep -F "$id,\"modified\"]" |cut -f 2)
+		type=$(echo "$allpushes" | grep -F "$id,\"type\"]" |cut -f 2)
+
+		# set title if none is stored
+		title=${title:-"(no title)"}
+
 		echo "$iden:$type:$title:$modified"
 	done
 }
@@ -198,7 +198,7 @@ getPushes() {
 	checkCurlOutput "$curlres"
 	response="[ $curlres"
 
-	# check if query needs pagination, also stop requesting more pages if the cursor repeats
+	# check if query needs pagination
 	until [ -z "$(checkPagination "$curlres")" ]; do
 		curlres=$(curl --silent --header "Access-Token: $PB_API_KEY" \
 		--data-urlencode active="$active" \
@@ -207,7 +207,7 @@ getPushes() {
 		--get \
 		"$API_URL/pushes$iden")
 		response="$response, $curlres"
-		prevcursor="$(checkPagination "$curlres")"
+		# checkCurlOutput will call break once no new pushes are received
 		checkCurlOutput "$curlres"
 	done
 	echo "$response ]"
@@ -323,14 +323,13 @@ delete)
 		fi
 		info "deleting all pushes except the last $3"
 		number=$(($3+1))
-		allpushes=$(getPushes | "$PROGDIR"/JSON.sh -b)
-		# TODO adapt for pagination
-		activepushes=$(echo "$allpushes" | egrep "\"pushes\",[0-9]+,\"active\"\].*true"|while read line; do echo "$line"|cut -f 2 -d ,; done | tail -n "+$number")
-		for id in $activepushes; do
-			iden=$(echo "$allpushes" | grep -m 1 "\"pushes\",$id,\"iden\"\]"|cut -f 2 | cut -d'"' -f 2)
+		while read line; do
+			iden=${line%%:*}
 			# call pushbullet-bash itself to delete the pushes
-			$0 delete "$iden"
-		done
+			# use tr to remove quotes around iden
+			$0 delete $(echo "$iden" | tr -d '"')
+		# pushes are always displayed with the newest first. By tailing the output we skip the newest $number
+		done < <(getPushes | getactivepushes | tail -n "+$number")
 		;;
 	*)
 		info "deleting $2"
