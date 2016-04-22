@@ -30,6 +30,11 @@ if [ ! "$(which curl)" ]; then
 	exit 1
 fi
 
+if [ ! -e "$PROGDIR"/helpers/JSON.sh/JSON.sh ]
+	err "pushbullet-bash required JSON.sh to be present for some commands"
+	cd "$PROGDIR" && git submodule init && git submodule update
+fi
+
 # override default PB_CONFIG if different file or API key has been given
 if [[ ! -n "$PB_CONFIG" ]] && [[ ! -n "$PB_API_KEY" ]]; then
 	PB_CONFIG=~/.config/pushbullet
