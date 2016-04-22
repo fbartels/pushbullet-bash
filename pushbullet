@@ -26,13 +26,14 @@ err() {
 }
 
 if [ ! "$(which curl)" ]; then
-	err "pushbullet-bash requires curl to run. Please install curl"
+	err "pushbullet-bash requires curl to run. Please install curl."
 	exit 1
 fi
 
 if [ ! -e "$PROGDIR"/helpers/JSON.sh/JSON.sh ]; then
-	err "pushbullet-bash required JSON.sh to be present for some commands"
+	err "Not all required libraries are installed. Fetching git submodules."
 	cd "$PROGDIR" && git submodule init && git submodule update
+	exit
 fi
 
 # override default PB_CONFIG if different file or API key has been given
