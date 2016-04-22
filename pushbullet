@@ -83,7 +83,7 @@ exit 1
 
 function getactivepushes () {
 	# first command in a function reads stdin
-	allpushes=$("$PROGDIR"/JSON.sh -b)
+	allpushes=$("$PROGDIR"/helpers/JSON.sh/JSON.sh -b)
 	activepushes=$(echo "$allpushes" | egrep "\"pushes\",[0-9]+,\"active\"\].*true" \
 	| while read line; do id=${line%,*}; echo $id; done)
 	for id in $activepushes; do
@@ -356,7 +356,7 @@ pull)
 		printUsage
 		;;
 	*)
-		getPushes -i $2 | "$PROGDIR"/JSON.sh -b
+		getPushes -i $2 | "$PROGDIR"/helpers/JSON.sh/JSON.sh -b
 		;;
 	esac
 	;;
@@ -430,13 +430,13 @@ push)
 		--request POST \
 		"$API_URL/upload-request")
 		curlres2=$(curl --silent --include --request POST \
-		$(echo "$curlres" | "$PROGDIR"/JSON.sh -b | grep upload_url | awk -F\" '{print $(NF-1)}') \
+		$(echo "$curlres" | "$PROGDIR"/helpers/JSON.sh/JSON.sh -b | grep upload_url | awk -F\" '{print $(NF-1)}') \
 		-F file=@"$file")
 
 		type=file
-		file_name=$(echo "$curlres" | "$PROGDIR"/JSON.sh -b | grep file_name |awk -F\" '{print $(NF-1)}')
-		file_type=$(echo "$curlres" | "$PROGDIR"/JSON.sh -b | grep file_type |awk -F\" '{print $(NF-1)}')
-		file_url=$(echo "$curlres" | "$PROGDIR"/JSON.sh -b | grep file_url |awk -F\" '{print $(NF-1)}')
+		file_name=$(echo "$curlres" | "$PROGDIR"/helpers/JSON.sh/JSON.sh -b | grep file_name |awk -F\" '{print $(NF-1)}')
+		file_type=$(echo "$curlres" | "$PROGDIR"/helpers/JSON.sh/JSON.sh -b | grep file_type |awk -F\" '{print $(NF-1)}')
+		file_url=$(echo "$curlres" | "$PROGDIR"/helpers/JSON.sh/JSON.sh -b | grep file_url |awk -F\" '{print $(NF-1)}')
 		json="{\"type\":\"$type\",\"title\":\"$title\",\"body\":\"$body\",\"file_name\":\"$file_name\",\"file_type\":\"$file_type\",\"file_url\":\"$file_url\""
 	;;
 	*)
