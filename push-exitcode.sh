@@ -2,9 +2,15 @@
 # Partly inspired by pace (https://github.com/esamson/pace)
 
 # Send a message through pushbullet after a command has finished.
-# Can be called in two ways:
+#
+# This script has to be sourced and can be called in two ways.
 # apt-get update; pb # will just report the exit status.
 # pb apt-get update # will send the command, time till exit and return code.
+
+if [[ "$(basename -- "$0")" == "push-exitcode.sh" ]]; then
+	echo "Don't run $0, source it" >&2
+	exit 1
+fi
 
 pb() {
 	EXITCODE=$?
