@@ -30,7 +30,7 @@ if [ ! "$(which curl)" ]; then
 	exit 1
 fi
 
-if [ ! -e "$PROGDIR"/helpers/JSON.sh/JSON.sh ]
+if [ ! -e "$PROGDIR"/helpers/JSON.sh/JSON.sh ]; then
 	err "pushbullet-bash required JSON.sh to be present for some commands"
 	cd "$PROGDIR" && git submodule init && git submodule update
 fi
