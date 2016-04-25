@@ -1,8 +1,5 @@
 #! /bin/bash
 
-# avoid "EXPECTED value GOT EOF" errors when no pushes are returned
-set -e
-
 # Bash interface to the PushBullet api.
 # Author: Red5d - https://github.com/Red5d
 
@@ -36,7 +33,7 @@ if [ ! -e "$PROGDIR"/JSON.sh ]; then
 	exit
 fi
 
-# override default PB_CONFIG if different file or API key has been given
+# use default PB_CONFIG if no different file or API key has been given
 if [[ ! -n "$PB_CONFIG" ]] && [[ ! -n "$PB_API_KEY" ]]; then
 	PB_CONFIG=~/.config/pushbullet
 fi
@@ -47,6 +44,9 @@ if [[ -z "$PB_API_KEY" ]] && [[ "$1" != "setup" ]]; then
 	err -e "\e[0;33mWarning, your API key is not set.\nPlease create \"$PB_CONFIG\" with a line starting with PB_API_KEY= and your PushBullet key\e[00m"
 	exit 1
 fi
+
+# from here on set -e to avoid "EXPECTED value GOT EOF" errors from JSON.sh when no pushes are returned
+set -e
 
 printUsage() {
 echo "Usage: pushbullet [-q|--quiet|-d|--debug] <action> <device> <type> <data>
