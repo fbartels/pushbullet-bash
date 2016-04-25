@@ -29,7 +29,7 @@ fi
 
 if [ ! -e "$PROGDIR"/JSON.sh ]; then
 	err "Not all required libraries are installed. Please change into the pushbullet-bash folder and run the following command:"
-	echo "git submodule init && git submodule update"
+	err "git submodule init && git submodule update"
 	exit
 fi
 
