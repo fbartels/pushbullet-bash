@@ -3,9 +3,14 @@
 
 # Send a message through pushbullet after a command has finished.
 #
-# This script has to be sourced and can be called in two ways.
+# This script has to be sourced and can be called in two ways:
 # apt-get update; pb # will just report the exit status.
 # pb apt-get update # will send the command, time till exit and return code.
+#
+# Did you start your long running command without chaining push-exitcode to it? You can use job control to suspend the process and then return it to the foreground with an added ; pb:
+# long-ronning command
+## enter Ctrl-z to suspend
+# fg ; pb
 
 if [[ "$(basename -- "$0")" == "push-exitcode.sh" ]]; then
 	echo "Don't run $0, source it" >&2
