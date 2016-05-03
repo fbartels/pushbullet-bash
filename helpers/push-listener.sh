@@ -47,11 +47,12 @@ displayPushes(){
 			pushbullet pull $(echo "$iden" | tr -d '"')
 		fi
 	# use tac to display the oldest first instead of the newest
-	done < <(pushbullet -q pushes recent | tac)
+	done < <(PB_API_KEY=$PB_API_KEY PB_CONFIG=/tmp/pushbullet.cfg pushbullet -q pushes recent | tac)
 }
 
 # list pushes once at start
-displayPushes
+#displayPushes
+PB_API_KEY=$PB_API_KEY PB_CONFIG=/tmp/pushbullet.cfg pushbullet -q pushes recent | tac
 
 # listen to websocket for new pushes
 while read -r line ; do
