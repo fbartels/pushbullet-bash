@@ -23,11 +23,13 @@ pb() {
 	if [ ! -z "$1" ]; then
 		# when called with arguments execute these
 		START_TIME=$SECONDS
+		COMMAND="$@"
 		eval "$@"
 		EXITCODE=$?
 		ELAPSED_TIME=$((SECONDS - START_TIME))
 		TIME="$((ELAPSED_TIME / 60)) min $((ELAPSED_TIME % 60)) sec"
 	else
+		COMMAND="command unkown"
 		TIME="duration unknown"
 	fi
 
@@ -37,6 +39,6 @@ pb() {
 		PUSH_TITLE="FAIL!"
 	fi
 
-	pushbullet push all note "$PUSH_TITLE Command completed on $(hostname)" "Finished $* in $TIME. Return code was $EXITCODE."
+	pushbullet -q push all note "$PUSH_TITLE Command completed on $(hostname)" "Finished command $COMMAND in $TIME. Return code was $EXITCODE."
 	return $EXITCODE
 }
