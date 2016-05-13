@@ -70,7 +70,7 @@ delete all - Delete all pushes.
 pull \$iden - Display a specific push.
 setup - Use OAuth to retrieve a PushBullet API key for pushbullet-bash.
 create-device - create a device in pushbullet named like the current hostname.
-chat device \$email - create a chat with the passed email. Does not send a message.
+chat create \$email - create a chat with the passed email. Does not send a message.
 
 Types:
 note
@@ -147,7 +147,7 @@ getChats() {
 		--data-urlencode cursor="$(checkPagination "$curlres")" \
 		--get \
 		"$API_URL/chats")
-		devices="$chats $curlres"
+		chats="$chats $curlres"
 	done
 	echo "$chats"
 }
