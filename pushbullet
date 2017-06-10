@@ -468,8 +468,7 @@ push)
 
 	title="$4"
 	body=""
-	# test if something is on stdin, -t will timeout immediately if not
-	if read -t 0 ; then
+	if [ ! -t 0 ]; then
 		# we have something on stdin
 		body=$(cat)
 		# remove unprintable characters, or pushbullet API fails
